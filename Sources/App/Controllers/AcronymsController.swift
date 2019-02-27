@@ -14,8 +14,9 @@ struct AcronymsController: RouteCollection {
         acronymsRoutes.get("first", use: getFirstAcronym)
         acronymsRoutes.get("sorted",use:getAllAcronymsSorted)
         acronymsRoutes.get(Acronym.parameter, "user",use: getUserForAcronym)
-        
-        
+        acronymsRoutes.post(Acronym.parameter, "categories", Category.parameter, use: addCategories)
+        acronymsRoutes.get(Acronym.parameter, "categories", use: getCategories)
+        acronymsRoutes.delete(Acronym.parameter, "categories", Category.parameter, use: removeCategory)
     }
     
     private func getAllAcronyms(_ request: Request)throws -> Future<[Acronym]> {
@@ -82,6 +83,34 @@ struct AcronymsController: RouteCollection {
     func getUserForAcronym(request: Request)throws -> Future<User> {
         return try request.parameters.next(Acronym.self).flatMap(to: User.self) { acronym in
             return acronym.user.get(on: request)
+        }
+    }
+    
+    func addCategories(request: Request)throws -> Future<HTTPStatus> {
+        return try flatMap(to: HTTPStatus.self,request.parameters.next(Acronym.self),request.parameters.next(Category.self)) { acronym, category in
+            
+            return acronym.categories.attach(category, on: request).transform(to: .created)
+            
+            }
+    }
+    
+    private func getCategories (request: Request)throws -> Future<[Category]> {
+        
+        return try request.parameters.next(Acronym.self).flatMap(to: [Category].self) { acronym in
+            
+            try acronym.categories.query(on: request).all()
+            
+        }
+        
+    }
+    
+    private func removeCategory(request:Request ) throws -> Future<HTTPStatus> {
+        
+        return try flatMap(to: HTTPStatus.self, request.parameters.next(Acronym.self), request.parameters.next(Category.self)) {
+            acronym, category in
+            
+            return acronym.categories.detach(category, on: request).transform(to: .noContent)
+            
         }
     }
     

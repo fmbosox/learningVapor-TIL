@@ -10,7 +10,7 @@ public func routes(_ router: Router) throws {
     
     
     let controllers: [RouteCollection] = [AcronymsController(),
-                                          UsersController(),
+                                          UsersController(),CategoriesController ()
                                           ]
     for controller in controllers {
         try router.register(collection: controller)
