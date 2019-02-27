@@ -7,7 +7,13 @@ public func routes(_ router: Router) throws {
         return "It works!"
     }
     
-    let acronymsController = AcronymsController()
-    try router.register(collection: acronymsController)
+    
+    
+    let controllers: [RouteCollection] = [AcronymsController(),
+                                          UsersController(),
+                                          ]
+    for controller in controllers {
+        try router.register(collection: controller)
+    }
 
 }
